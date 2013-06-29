@@ -1,0 +1,1 @@
+insert into person(name) select person from matrix;
