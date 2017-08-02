@@ -1,4 +1,4 @@
-paulrevere
+Paul Revere
 ==========
 
-This is inspired by post http://kieranhealy.org/blog/archives/2013/06/09/using-metadata-to-find-paul-revere/
+Now with Information page!(https://github.com/mariotalavera/paulrevere/blob/master/docs/README.md)
