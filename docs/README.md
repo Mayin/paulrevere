@@ -11,7 +11,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 
 2. Looking at the data, we can easily imagine how to import this into a relational system.  We only need to add a header to the person column and we will be up and going in no time.  This file contains organization data for 254 persons and 7 organizations.
 
-![image1.png]({{site.baseurl}}/docs/image1.png)
+![image1.png](docs/image1.png)
 
 Without doing any work, we have a table with persons and a bit stating whether they belong to any of the seven organizations defined.
 
