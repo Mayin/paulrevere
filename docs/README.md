@@ -106,7 +106,7 @@ Here’s our top suspects.  First lets look at the raw data.
 
 All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone’s privacy!
 
-![image3.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image3.png)
+![image33.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image33.png)
 
 9. Interestingly, we can build an additional script on this and determine which organizations should be deemed suspect by the influence its members have on the population as follows.  Lets create a view to keep things neat.
 
