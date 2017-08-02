@@ -74,7 +74,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   where   b.stAndrewsLodge = 1;
   ```
 
-8 . Finding persons of interest, as Kieran pointed out, boils down to the persons of most influence on their peers.  In SQL lingo, we just want to rank our users by number of connections.  This is a much simpler problem like that of Facebook or LinkedIn because every person we have, we connect thru a defined group.
+8. Finding persons of interest, as Kieran pointed out, boils down to the persons of most influence on their peers.  In SQL lingo, we just want to rank our users by number of connections.  This is a much simpler problem like that of Facebook or LinkedIn because every person we have, we connect thru a defined group.
 
   First, lets create a view so that we can reuse this set (script).
 
@@ -100,13 +100,13 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   from personconns m;
   ```
 
-Here’s our top suspects.  First lets look at the raw data.
+  Here’s our top suspects.  First lets look at the raw data.
 
-![image2.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image2.png)
+  ![image2.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image2.png)
+  
+  All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone’s privacy!
 
-All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone’s privacy!
-
-![image33.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image33.png)
+  ![image33.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image33.png)
 
 9. Interestingly, we can build an additional script on this and determine which organizations should be deemed suspect by the influence its members have on the population as follows.  Lets create a view to keep things neat.
 
@@ -189,4 +189,3 @@ All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re
   ![image6.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image6.png)
 
 It was good to follow thru something fun like this.  Thanks for reading.
-
