@@ -17,4 +17,105 @@ Without doing any work, we have a table with persons and a bit stating whether t
 
 3. Create our database and tables: person, org and orgperson:
 
+3. Create our database and tables: person, org and orgperson:
 
+CREATE TABLE `person` ( 
+  `idperson` int(11) NOT NULL AUTO_INCREMENT, 
+  `name` varchar(45) NOT NULL, 
+  PRIMARY KEY (`idperson`) 
+) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `org` ( 
+  `idorg` int(11) NOT NULL AUTO_INCREMENT, 
+  `name` varchar(45) NOT NULL, 
+  PRIMARY KEY (`idorg`) 
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `orgperson` ( 
+  `idperson` int(11) NOT NULL, 
+  `idorg` int(11) NOT NULL, 
+  PRIMARY KEY (`idperson`,`idorg`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+4. Populate our database
+
+Using the CVS file that Kieran provided, we create an insert into script to bulk insert data into table.
+
+5. Having this table in our database, we populate the person table (script) as follows:
+
+insert into person(name) select person from matrix;
+
+6. Populating the Organization Table is about as simple (script).
+
+insert into org(name) values(‘stAndrewsLodge’); 
+insert into org(name) values(‘LoyalNine’); 
+insert into org(name) values(‘NorthCaucus’); 
+insert into org(name) values(‘LongRoomClub’); 
+insert into org(name) values(‘TeaParty’); 
+insert into org(name) values(‘BostonCommittee’); 
+insert into org(name) values(‘LondonEnemies’);
+
+7. Lastly of our population scripts, we populate our association table, orgperson.  High tech indeed.  The script for this is here.  The general idea is to insert all person-org memberships along these lines:
+
+— pop orgperson, stAndrewsLodge 
+insert into orgperson(idperson, idorg) 
+select  a.idperson, c.idorg 
+from    person a inner join matrix b on a.name = b.person 
+        inner join org c on c.name = ‘stAndrewsLodge’ 
+where   b.stAndrewsLodge = 1;
+
+8 . Finding persons of interest, as Kieran pointed out, boils down to the persons of most influence on their peers.  In SQL lingo, we just want to rank our users by number of connections.  This is a much simpler problem like that of Facebook or LinkedIn because every person we have, we connect thru a defined group.
+
+First, lets create a view so that we can reuse this set (script).
+
+create or replace view personconns as 
+select  a.name, count(distinct e.name) numconns 
+from    person a 
+        — Lets join person to orgs he belongs to 
+        inner join orgperson b on a.idperson = b.idperson 
+        inner join org c on b.idorg = c.idorg 
+        — Lets join this org to other persons 
+        inner join orgperson d on c.idorg = d.idorg 
+        inner join person e on d.idperson = e.idperson 
+where   a.idperson <> d.idperson 
+group by a.name 
+order by 2 desc;
+
+Lastly, we write a script with the simplest of queries to rank these persons by the number of connections each has.
+
+select (select count(distinct numconns) from personconns where numconns >= m.numconns) rank, m.name, numconns 
+from personconns m;
+
+Here’s our top suspects.  First lets look at the raw data.
+
+![image2.png]({{site.baseurl}}/docs/image2.png)
+
+All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone’s privacy!
+
+![]({{site.baseurl}}/docs/image3.png)
+
+9. Interestingly, we can build an additional script on this and determine which organizations should be deemed suspect by the influence its members have on the population as follows.  Lets create a view to keep things neat.
+
+create or replace view orgconns as 
+select  z.name, count(distinct e.name) numconns 
+from    org z 
+        — Lets get all the users for this org 
+        inner join orgperson x on z.idorg = x.idorg 
+        inner join person a on x.idperson = a.idperson 
+        — Lets join person to orgs he belongs to 
+        inner join orgperson b on a.idperson = b.idperson 
+        inner join org c on b.idorg = c.idorg 
+        — Lets join this org to other persons 
+        inner join orgperson d on c.idorg = d.idorg 
+        inner join person e on d.idperson = e.idperson 
+where   1=1 
+and     a.idperson <> d.idperson 
+group by z.name 
+order by 2 desc;
+
+Just as before, we can rank the set of our findings for our field agents with this script!
+
+select (select count(distinct numconns) from orgconns where numconns >= m.numconns) rank, m.name, numconns 
+from orgconns m;
+
+The results of this do not prove as interesting as the person connections but the at least help us narrow down the work.  Remember, we only have 254 persons and 7 organizations.
