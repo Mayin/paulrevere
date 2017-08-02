@@ -17,9 +17,7 @@ Without doing any work, we have a table with persons and a bit stating whether t
 
 3. Create our database and tables: person, org and orgperson:
 
-3. Create our database and tables: person, org and orgperson:
-
-```
+``` SQL
 CREATE TABLE `person` ( 
   `idperson` int(11) NOT NULL AUTO_INCREMENT, 
   `name` varchar(45) NOT NULL, 
@@ -27,7 +25,7 @@ CREATE TABLE `person` (
 ) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8;
 ```
 
-```
+```SQL
 CREATE TABLE `org` ( 
   `idorg` int(11) NOT NULL AUTO_INCREMENT, 
   `name` varchar(45) NOT NULL, 
@@ -35,7 +33,7 @@ CREATE TABLE `org` (
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 ```
 
-```
+```sql
 CREATE TABLE `orgperson` ( 
   `idperson` int(11) NOT NULL, 
   `idorg` int(11) NOT NULL, 
@@ -49,7 +47,7 @@ Using the CVS file that Kieran provided, we create an insert into script to bulk
 
 5. Having this table in our database, we populate the person table (script) as follows:
 
-```
+``` sql
 insert into person(name) select person from matrix;
 ```
 
