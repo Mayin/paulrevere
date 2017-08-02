@@ -17,29 +17,29 @@ Without doing any work, we have a table with persons and a bit stating whether t
 
 3. Create our database and tables: person, org and orgperson:
 
-``` SQL
-CREATE TABLE `person` ( 
-  `idperson` int(11) NOT NULL AUTO_INCREMENT, 
-  `name` varchar(45) NOT NULL, 
-  PRIMARY KEY (`idperson`) 
-) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8;
-```
+  ``` SQL
+  CREATE TABLE `person` ( 
+    `idperson` int(11) NOT NULL AUTO_INCREMENT, 
+    `name` varchar(45) NOT NULL, 
+    PRIMARY KEY (`idperson`) 
+  ) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8;
+  ```
 
-```SQL
-CREATE TABLE `org` ( 
-  `idorg` int(11) NOT NULL AUTO_INCREMENT, 
-  `name` varchar(45) NOT NULL, 
-  PRIMARY KEY (`idorg`) 
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
-```
+  ```SQL
+  CREATE TABLE `org` ( 
+    `idorg` int(11) NOT NULL AUTO_INCREMENT, 
+    `name` varchar(45) NOT NULL, 
+    PRIMARY KEY (`idorg`) 
+  ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+  ```
 
-```sql
-CREATE TABLE `orgperson` ( 
-  `idperson` int(11) NOT NULL, 
-  `idorg` int(11) NOT NULL, 
-  PRIMARY KEY (`idperson`,`idorg`) 
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-```
+  ```sql
+  CREATE TABLE `orgperson` ( 
+    `idperson` int(11) NOT NULL, 
+    `idorg` int(11) NOT NULL, 
+    PRIMARY KEY (`idperson`,`idorg`) 
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  ```
 
 4. Populate our database
 
@@ -65,40 +65,40 @@ insert into org(name) values(‘LondonEnemies’);
 
 7. Lastly of our population scripts, we populate our association table, orgperson.  High tech indeed.  The script for this is here.  The general idea is to insert all person-org memberships along these lines:
 
-```
-— pop orgperson, stAndrewsLodge 
-insert into orgperson(idperson, idorg) 
-select  a.idperson, c.idorg 
-from    person a inner join matrix b on a.name = b.person 
-        inner join org c on c.name = ‘stAndrewsLodge’ 
-where   b.stAndrewsLodge = 1;
-```
+  ```
+  — pop orgperson, stAndrewsLodge 
+  insert into orgperson(idperson, idorg) 
+  select  a.idperson, c.idorg 
+  from    person a inner join matrix b on a.name = b.person 
+          inner join org c on c.name = ‘stAndrewsLodge’ 
+  where   b.stAndrewsLodge = 1;
+  ```
 
 8 . Finding persons of interest, as Kieran pointed out, boils down to the persons of most influence on their peers.  In SQL lingo, we just want to rank our users by number of connections.  This is a much simpler problem like that of Facebook or LinkedIn because every person we have, we connect thru a defined group.
 
 First, lets create a view so that we can reuse this set (script).
 
-```
-create or replace view personconns as 
-select  a.name, count(distinct e.name) numconns 
-from    person a 
-        — Lets join person to orgs he belongs to 
-        inner join orgperson b on a.idperson = b.idperson 
-        inner join org c on b.idorg = c.idorg 
-        — Lets join this org to other persons 
-        inner join orgperson d on c.idorg = d.idorg 
-        inner join person e on d.idperson = e.idperson 
-where   a.idperson <> d.idperson 
-group by a.name 
-order by 2 desc;
-```
+  ```
+  create or replace view personconns as 
+  select  a.name, count(distinct e.name) numconns 
+  from    person a 
+          — Lets join person to orgs he belongs to 
+          inner join orgperson b on a.idperson = b.idperson 
+          inner join org c on b.idorg = c.idorg 
+          — Lets join this org to other persons 
+          inner join orgperson d on c.idorg = d.idorg 
+          inner join person e on d.idperson = e.idperson 
+  where   a.idperson <> d.idperson 
+  group by a.name 
+  order by 2 desc;
+  ```
 
 Lastly, we write a script with the simplest of queries to rank these persons by the number of connections each has.
 
-```
-select (select count(distinct numconns) from personconns where numconns >= m.numconns) rank, m.name, numconns 
-from personconns m;
-```
+  ```
+  select (select count(distinct numconns) from personconns where numconns >= m.numconns) rank, m.name,   numconns 
+  from personconns m;
+  ```
 
 Here’s our top suspects.  First lets look at the raw data.
 
@@ -110,31 +110,31 @@ All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re
 
 9. Interestingly, we can build an additional script on this and determine which organizations should be deemed suspect by the influence its members have on the population as follows.  Lets create a view to keep things neat.
 
-```
-create or replace view orgconns as 
-select  z.name, count(distinct e.name) numconns 
-from    org z 
-        — Lets get all the users for this org 
-        inner join orgperson x on z.idorg = x.idorg 
-        inner join person a on x.idperson = a.idperson 
-        — Lets join person to orgs he belongs to 
-        inner join orgperson b on a.idperson = b.idperson 
-        inner join org c on b.idorg = c.idorg 
-        — Lets join this org to other persons 
-        inner join orgperson d on c.idorg = d.idorg 
-        inner join person e on d.idperson = e.idperson 
-where   1=1 
-and     a.idperson <> d.idperson 
-group by z.name 
-order by 2 desc;
-```
+  ```
+  create or replace view orgconns as 
+  select  z.name, count(distinct e.name) numconns 
+  from    org z 
+          — Lets get all the users for this org 
+          inner join orgperson x on z.idorg = x.idorg 
+          inner join person a on x.idperson = a.idperson 
+          — Lets join person to orgs he belongs to 
+          inner join orgperson b on a.idperson = b.idperson 
+          inner join org c on b.idorg = c.idorg 
+          — Lets join this org to other persons 
+          inner join orgperson d on c.idorg = d.idorg 
+          inner join person e on d.idperson = e.idperson 
+  where   1=1 
+  and     a.idperson <> d.idperson 
+  group by z.name 
+  order by 2 desc;
+  ```
 
 Just as before, we can rank the set of our findings for our field agents with this script!
 
-```
-select (select count(distinct numconns) from orgconns where numconns >= m.numconns) rank, m.name, numconns 
-from orgconns m;
-```
+  ```
+  select (select count(distinct numconns) from orgconns where numconns >= m.numconns) rank, m.name, numconns 
+  from orgconns m;
+  ```
 
 The results of this do not prove as interesting as the person connections but the at least help us narrow down the work.  Remember, we only have 254 persons and 7 organizations.
 
@@ -146,41 +146,41 @@ Not a clear result here, for the most part, all organizations seem to be similar
 
 Just for kicks, I decided to create a few views to derive the original matrix of data from our SQL. This one provides us with the user/organizations matrix we started with.  This would prove useful in further analysis.
 
-```
-create or replace view membershipmatrix as
-
-select    concat_ws(‘ ‘, SUBSTRING_INDEX(a.name, ‘.’,-1),  SUBSTRING_INDEX(a.name, ‘.’,1)) Person, 
-          SUBSTRING_INDEX(a.name, ‘.’,-1) FName, 
-          SUBSTRING_INDEX(a.name, ‘.’,1) LName, 
-          sum(case when b.idorg = 1 then 1 else 0 end) StAndrewsLodge , 
-          sum(case when b.idorg = 2 then 1 else 0 end) LoyalNine, 
-          sum(case when b.idorg = 3 then 1 else 0 end) NorthCaucus, 
-          sum(case when b.idorg = 4 then 1 else 0 end) LongRoomClub, 
-          sum(case when b.idorg = 5 then 1 else 0 end) TeaParty, 
-          sum(case when b.idorg = 6 then 1 else 0 end) BostonCommittee, 
-          sum(case when b.idorg = 7 then 1 else 0 end) LondonEnemies 
-from      person a left join orgperson b on a.idperson = b.idperson 
-          left join org c on c.idorg = b.idorg 
-group by a.name 
-order by  SUBSTRING_INDEX(a.name, ‘.’,1),  SUBSTRING_INDEX(a.name, ‘.’,-1);
-```
+  ```
+  create or replace view membershipmatrix as
+  
+  select    concat_ws(‘ ‘, SUBSTRING_INDEX(a.name, ‘.’,-1),  SUBSTRING_INDEX(a.name, ‘.’,1)) Person, 
+            SUBSTRING_INDEX(a.name, ‘.’,-1) FName, 
+            SUBSTRING_INDEX(a.name, ‘.’,1) LName, 
+            sum(case when b.idorg = 1 then 1 else 0 end) StAndrewsLodge , 
+            sum(case when b.idorg = 2 then 1 else 0 end) LoyalNine, 
+            sum(case when b.idorg = 3 then 1 else 0 end) NorthCaucus, 
+            sum(case when b.idorg = 4 then 1 else 0 end) LongRoomClub, 
+            sum(case when b.idorg = 5 then 1 else 0 end) TeaParty, 
+            sum(case when b.idorg = 6 then 1 else 0 end) BostonCommittee, 
+            sum(case when b.idorg = 7 then 1 else 0 end) LondonEnemies 
+  from      person a left join orgperson b on a.idperson = b.idperson 
+            left join org c on c.idorg = b.idorg 
+  group by a.name 
+  order by  SUBSTRING_INDEX(a.name, ‘.’,1),  SUBSTRING_INDEX(a.name, ‘.’,-1);
+  ```
 
 For example, this will enable us to follow on Kieran’s post finding organizations persons have in common as shown.
 
-```
-select    a.Person PersonA, 
-          b.Person PersonB, 
-          case when a.StAndrewsLodge + b.StAndrewsLodge = 2 then 1 else 0 end + 
-          case when a.LoyalNine + b.LoyalNine = 2 then 1 else 0 end + 
-          case when a.NorthCaucus + b.NorthCaucus = 2 then 1 else 0 end + 
-          case when a.LongRoomClub + b.LongRoomClub = 2 then 1 else 0 end + 
-          case when a.TeaParty + b.TeaParty = 2 then 1 else 0 end + 
-          case when a.BostonCommittee + b.BostonCommittee = 2 then 1 else 0 end + 
-          case when a.LondonEnemies + b.LondonEnemies = 2 then 1 else 0 end Connections 
-from      membershipmatrix a cross join membershipmatrix b 
-where    a.person <> b.person 
-order by  a.lname, a.fname, b.lname, b.fname
-```
+  ```
+  select    a.Person PersonA, 
+            b.Person PersonB, 
+            case when a.StAndrewsLodge + b.StAndrewsLodge = 2 then 1 else 0 end + 
+            case when a.LoyalNine + b.LoyalNine = 2 then 1 else 0 end + 
+            case when a.NorthCaucus + b.NorthCaucus = 2 then 1 else 0 end + 
+            case when a.LongRoomClub + b.LongRoomClub = 2 then 1 else 0 end + 
+            case when a.TeaParty + b.TeaParty = 2 then 1 else 0 end + 
+            case when a.BostonCommittee + b.BostonCommittee = 2 then 1 else 0 end + 
+            case when a.LondonEnemies + b.LondonEnemies = 2 then 1 else 0 end Connections 
+  from      membershipmatrix a cross join membershipmatrix b 
+  where    a.person <> b.person 
+  order by  a.lname, a.fname, b.lname, b.fname
+  ```
 
 With only seven organizations, writing a sql query to do the equivalent organization matrix is no trouble at all.  It is a bit lengthy for post thou, you can always pick up script here.
 
