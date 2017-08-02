@@ -17,7 +17,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 
 3. Create our database and tables: person, org and orgperson:
 
-  ``` SQL
+  ```sql
   CREATE TABLE `person` ( 
     `idperson` int(11) NOT NULL AUTO_INCREMENT, 
     `name` varchar(45) NOT NULL, 
@@ -25,7 +25,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   ) ENGINE=InnoDB AUTO_INCREMENT=255 DEFAULT CHARSET=utf8;
   ```
 
-  ```SQL
+  ```sql
   CREATE TABLE `org` ( 
     `idorg` int(11) NOT NULL AUTO_INCREMENT, 
     `name` varchar(45) NOT NULL, 
@@ -47,13 +47,13 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 
 5. Having this table in our database, we populate the person table (script) as follows:
 
-  ``` sql
+  ```sql
   insert into person(name) select person from matrix;
   ```
 
 6. Populating the Organization Table is about as simple (script).
 
-  ```
+  ```sql
   insert into org(name) values(‘stAndrewsLodge’); 
   insert into org(name) values(‘LoyalNine’); 
   insert into org(name) values(‘NorthCaucus’); 
@@ -65,7 +65,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 
 7. Lastly of our population scripts, we populate our association table, orgperson.  High tech indeed.  The script for this is here.  The general idea is to insert all person-org memberships along these lines:
 
-  ```
+  ```sql
   — pop orgperson, stAndrewsLodge 
   insert into orgperson(idperson, idorg) 
   select  a.idperson, c.idorg 
@@ -78,7 +78,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 
   First, lets create a view so that we can reuse this set (script).
 
-  ```
+  ```sql
   create or replace view personconns as 
   select  a.name, count(distinct e.name) numconns 
   from    person a 
@@ -95,7 +95,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 
   Lastly, we write a script with the simplest of queries to rank these persons by the number of connections each has.
 
-  ```
+  ```sql
   select (select count(distinct numconns) from personconns where numconns >= m.numconns) rank, m.name,   numconns 
   from personconns m;
   ```
@@ -110,7 +110,7 @@ All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re
 
 9. Interestingly, we can build an additional script on this and determine which organizations should be deemed suspect by the influence its members have on the population as follows.  Lets create a view to keep things neat.
 
-  ```
+  ```sql
   create or replace view orgconns as 
   select  z.name, count(distinct e.name) numconns 
   from    org z 
@@ -131,7 +131,7 @@ All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re
 
   Just as before, we can rank the set of our findings for our field agents with this script!
 
-  ```
+  ```sql
   select (select count(distinct numconns) from orgconns where numconns >= m.numconns) rank, m.name, numconns 
   from orgconns m;
   ```
@@ -146,7 +146,7 @@ All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re
 
   Just for kicks, I decided to create a few views to derive the original matrix of data from our SQL. This one provides us with the user/organizations matrix we started with.  This would prove useful in further analysis.
 
-  ```
+  ```sql
   create or replace view membershipmatrix as
   
   select    concat_ws(‘ ‘, SUBSTRING_INDEX(a.name, ‘.’,-1),  SUBSTRING_INDEX(a.name, ‘.’,1)) Person, 
@@ -167,7 +167,7 @@ All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re
 
   For example, this will enable us to follow on Kieran’s post finding organizations persons have in common as shown.
 
-  ```
+  ```sql
   select    a.Person PersonA, 
             b.Person PersonB, 
             case when a.StAndrewsLodge + b.StAndrewsLodge = 2 then 1 else 0 end + 
