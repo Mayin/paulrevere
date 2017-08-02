@@ -92,7 +92,7 @@ Here’s our top suspects.  First lets look at the raw data.
 
 All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone’s privacy!
 
-![]({{site.baseurl}}/docs/image3.png)
+![image3.png]({{site.baseurl}}/docs/image3.png)
 
 9. Interestingly, we can build an additional script on this and determine which organizations should be deemed suspect by the influence its members have on the population as follows.  Lets create a view to keep things neat.
 
@@ -119,3 +119,49 @@ select (select count(distinct numconns) from orgconns where numconns >= m.numcon
 from orgconns m;
 
 The results of this do not prove as interesting as the person connections but the at least help us narrow down the work.  Remember, we only have 254 persons and 7 organizations.
+
+![image4.png]({{site.baseurl}}/docs/image4.png)
+
+Not a clear result here, for the most part, all organizations seem to be similarly influential.  Our visual further exposes this.
+
+![image5.png]({{site.baseurl}}/docs/image5.png)
+
+Just for kicks, I decided to create a few views to derive the original matrix of data from our SQL. This one provides us with the user/organizations matrix we started with.  This would prove useful in further analysis.
+
+create or replace view membershipmatrix as
+
+select    concat_ws(‘ ‘, SUBSTRING_INDEX(a.name, ‘.’,-1),  SUBSTRING_INDEX(a.name, ‘.’,1)) Person, 
+          SUBSTRING_INDEX(a.name, ‘.’,-1) FName, 
+          SUBSTRING_INDEX(a.name, ‘.’,1) LName, 
+          sum(case when b.idorg = 1 then 1 else 0 end) StAndrewsLodge , 
+          sum(case when b.idorg = 2 then 1 else 0 end) LoyalNine, 
+          sum(case when b.idorg = 3 then 1 else 0 end) NorthCaucus, 
+          sum(case when b.idorg = 4 then 1 else 0 end) LongRoomClub, 
+          sum(case when b.idorg = 5 then 1 else 0 end) TeaParty, 
+          sum(case when b.idorg = 6 then 1 else 0 end) BostonCommittee, 
+          sum(case when b.idorg = 7 then 1 else 0 end) LondonEnemies 
+from      person a left join orgperson b on a.idperson = b.idperson 
+          left join org c on c.idorg = b.idorg 
+group by a.name 
+order by  SUBSTRING_INDEX(a.name, ‘.’,1),  SUBSTRING_INDEX(a.name, ‘.’,-1);
+
+For example, this will enable us to follow on Kieran’s post finding organizations persons have in common as shown.
+
+select    a.Person PersonA, 
+          b.Person PersonB, 
+          case when a.StAndrewsLodge + b.StAndrewsLodge = 2 then 1 else 0 end + 
+          case when a.LoyalNine + b.LoyalNine = 2 then 1 else 0 end + 
+          case when a.NorthCaucus + b.NorthCaucus = 2 then 1 else 0 end + 
+          case when a.LongRoomClub + b.LongRoomClub = 2 then 1 else 0 end + 
+          case when a.TeaParty + b.TeaParty = 2 then 1 else 0 end + 
+          case when a.BostonCommittee + b.BostonCommittee = 2 then 1 else 0 end + 
+          case when a.LondonEnemies + b.LondonEnemies = 2 then 1 else 0 end Connections 
+from      membershipmatrix a cross join membershipmatrix b 
+where    a.person <> b.person 
+order by  a.lname, a.fname, b.lname, b.fname
+
+With only seven organizations, writing a sql query to do the equivalent organization matrix is no trouble at all.  It is a bit lengthy for post thou, you can always pick up script here.
+
+Instead, have a look at the set it returns. At a glance, we see how many persons any two organizations have in common.
+
+![image6.png]({{site.baseurl}}/docs/image6.png)
