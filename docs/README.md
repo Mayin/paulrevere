@@ -1,5 +1,5 @@
 ## I Too Found Paul Revere
-I am coming from [this Reddit post](http://www.reddit.com/r/sociology/comments/1g38fk/finding_paul_revere_in_a_historical_example_a/) and from [here](http://kieranhealy.org/blog/archives/2013/06/09/using-metadata-to-find-paul-revere/)… This post exists solely because I too wanted to find Paul Revere.  I am not even going to use ‘big data’.  Mainly because this data is not big, I do not have a graph database and because I think it would be fun to see what plain old SQL and [Tableau](http://www.tableausoftware.com/) can show us.  For truly insightful posts, just visit [Kieran Healy](http://kieranhealy.org/blog/), the author of the original post instead.
+I am coming from [this Reddit post](http://www.reddit.com/r/sociology/comments/1g38fk/finding_paul_revere_in_a_historical_example_a/) and from [here](http://kieranhealy.org/blog/archives/2013/06/09/using-metadata-to-find-paul-revere/)… This post exists solely because I too wanted to find Paul Revere.  I am not even going to use 'big data'.  Mainly because this data is not big, I do not have a graph database and because I think it would be fun to see what plain old SQL and [Tableau](http://www.tableausoftware.com/) can show us.  For truly insightful posts, just visit [Kieran Healy](http://kieranhealy.org/blog/), the author of the original post instead.
 
 Kieran makes a very compelling argument on what is possible for surveillance programs the general population may (or not) understand.  His post is really fascinating.  Follow along and you can learn to monitor your citizens as well. 
 
@@ -54,13 +54,13 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
 6. Populating the Organization Table is about as simple (script).
 
   ```sql
-  insert into org(name) values(‘stAndrewsLodge’); 
-  insert into org(name) values(‘LoyalNine’); 
-  insert into org(name) values(‘NorthCaucus’); 
-  insert into org(name) values(‘LongRoomClub’); 
-  insert into org(name) values(‘TeaParty’); 
-  insert into org(name) values(‘BostonCommittee’); 
-  insert into org(name) values(‘LondonEnemies’);
+  insert into org(name) values('stAndrewsLodge'); 
+  insert into org(name) values('LoyalNine'); 
+  insert into org(name) values('NorthCaucus'); 
+  insert into org(name) values('LongRoomClub'); 
+  insert into org(name) values('TeaParty'); 
+  insert into org(name) values('BostonCommittee'); 
+  insert into org(name) values('LondonEnemies');
   ```
 
 7. Lastly of our population scripts, we populate our association table, orgperson.  High tech indeed.  The script for this is here.  The general idea is to insert all person-org memberships along these lines:
@@ -70,7 +70,7 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   insert into orgperson(idperson, idorg) 
   select  a.idperson, c.idorg 
   from    person a inner join matrix b on a.name = b.person 
-          inner join org c on c.name = ‘stAndrewsLodge’ 
+          inner join org c on c.name = 'stAndrewsLodge' 
   where   b.stAndrewsLodge = 1;
   ```
 
@@ -100,11 +100,11 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   from personconns m;
   ```
 
-  Here’s our top suspects.  First lets look at the raw data.
+  Here's our top suspects.  First lets look at the raw data.
 
   ![image2.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image2.png)
   
-  All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you’re a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone’s privacy!
+  All of this just to say that I too found Paul Revere! Yay!  Sorry Paul, you're a hero to us.  Lets go ahead and visualize this.  It is very clear who our field operatives should lean into right?  All this without invading anyone's privacy!
 
   ![image33.png](https://raw.githubusercontent.com/mariotalavera/paulrevere/master/docs/image33.png)
 
@@ -149,9 +149,9 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   ```sql
   create or replace view membershipmatrix as
   
-  select    concat_ws(‘ ‘, SUBSTRING_INDEX(a.name, ‘.’,-1),  SUBSTRING_INDEX(a.name, ‘.’,1)) Person, 
-            SUBSTRING_INDEX(a.name, ‘.’,-1) FName, 
-            SUBSTRING_INDEX(a.name, ‘.’,1) LName, 
+  select    concat_ws(' ', SUBSTRING_INDEX(a.name, '.',-1),  SUBSTRING_INDEX(a.name, '.',1)) Person, 
+            SUBSTRING_INDEX(a.name, '.',-1) FName, 
+            SUBSTRING_INDEX(a.name, '.',1) LName, 
             sum(case when b.idorg = 1 then 1 else 0 end) StAndrewsLodge , 
             sum(case when b.idorg = 2 then 1 else 0 end) LoyalNine, 
             sum(case when b.idorg = 3 then 1 else 0 end) NorthCaucus, 
@@ -162,10 +162,10 @@ Anyways, just follow me for some simple analysis and see how we can too find Pau
   from      person a left join orgperson b on a.idperson = b.idperson 
             left join org c on c.idorg = b.idorg 
   group by a.name 
-  order by  SUBSTRING_INDEX(a.name, ‘.’,1),  SUBSTRING_INDEX(a.name, ‘.’,-1);
+  order by  SUBSTRING_INDEX(a.name, '.',1),  SUBSTRING_INDEX(a.name, '.',-1);
   ```
 
-  For example, this will enable us to follow on Kieran’s post finding organizations persons have in common as shown.
+  For example, this will enable us to follow on Kieran's post finding organizations persons have in common as shown.
 
   ```sql
   select    a.Person PersonA, 
